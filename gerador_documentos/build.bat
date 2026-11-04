@@ -50,6 +50,12 @@ venv\Scripts\python.exe -m PyInstaller ^
     --hidden-import=openpyxl.cell._writer ^
     --hidden-import=pandas ^
     --hidden-import=docx ^
+    --hidden-import=win32com ^
+    --hidden-import=win32com.client ^
+    --hidden-import=win32com.server ^
+    --hidden-import=win32api ^
+    --hidden-import=win32con ^
+    --hidden-import=pywintypes ^
     %ICO_FLAG% ^
     %ICO_DATA% ^
     main.py
