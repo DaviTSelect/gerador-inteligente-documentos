@@ -288,13 +288,26 @@ class Sidebar(QWidget):
         rodape_sub.setFont(QFont("Segoe UI", 8))
         rodape_sub.setStyleSheet(f"color: #475569; background: transparent;")
 
-        versao = QLabel("v1.0")
-        versao.setStyleSheet(f"color: #334155; font-size: 9px; background: transparent;")
-
         rod_layout.addWidget(rodape)
         rod_layout.addWidget(rodape_sub)
-        rod_layout.addSpacing(4)
-        rod_layout.addWidget(versao)
+        rod_layout.addSpacing(8)
+
+        update_row = QHBoxLayout()
+        update_row.setSpacing(5)
+        update_row.setContentsMargins(0, 0, 0, 0)
+        self._dot_update = QLabel("●")
+        self._dot_update.setStyleSheet(
+            "color: #F59E0B; font-size: 11px; background: transparent;"
+        )
+        self._dot_update.setFixedWidth(14)
+        self._texto_update = QLabel("Verificando atualizações...")
+        self._texto_update.setFont(QFont("Segoe UI", 8))
+        self._texto_update.setStyleSheet(
+            f"color: {COR_SIDEBAR_TEXT}; background: transparent;"
+        )
+        update_row.addWidget(self._dot_update)
+        update_row.addWidget(self._texto_update, 1)
+        rod_layout.addLayout(update_row)
         layout.addWidget(rodape_container)
 
     def atualizar(self, etapa_ativa: int, etapas_concluidas: list[int]):
@@ -305,6 +318,12 @@ class Sidebar(QWidget):
                 ind.atualizar("ativo")
             else:
                 ind.atualizar("pendente")
+
+    def atualizar_status_atualizacao(self, cor: str, texto: str):
+        self._dot_update.setStyleSheet(
+            f"color: {cor}; font-size: 11px; background: transparent;"
+        )
+        self._texto_update.setText(texto)
 
 
 # ── Etapa 1: Template ────────────────────────────────────────────────────────
@@ -1752,6 +1771,9 @@ class MainWindow(QMainWindow):
     dados_sessao centraliza tudo que é selecionado pelo usuário.
     """
 
+    _sinal_status_update = Signal(str, str)
+    _sinal_restart = Signal()
+
     def __init__(self):
         super().__init__()
         import os as _os
@@ -1770,6 +1792,8 @@ class MainWindow(QMainWindow):
 
         self._setup_ui()
         self.ir_para_etapa(1)
+        self._sinal_status_update.connect(self.sidebar.atualizar_status_atualizacao)
+        self._sinal_restart.connect(self._ao_reiniciar)
 
     def _aplicar_icone(self):
         import os, sys
@@ -1867,3 +1891,58 @@ class MainWindow(QMainWindow):
         self.dados_sessao = {}
         self.etapas_concluidas = []
         self.ir_para_etapa(1)
+
+    # ── Verificação e aplicação de atualizações ───────────────────────────────
+
+    def verificar_atualizacoes(self):
+        """Inicia verificação de atualização em background — não trava a UI."""
+        import threading
+        threading.Thread(target=self._verificar_atualizacoes_bg, daemon=True).start()
+
+    def _verificar_atualizacoes_bg(self):
+        """Roda em thread separada; comunica com a UI apenas por sinais."""
+        try:
+            import updater
+            info = updater.verificar_atualizacao()
+        except Exception:
+            self._sinal_status_update.emit("#64748B", "sem conexão")
+            return
+
+        versao_local = info.get("versao_local", "?")
+
+        if not info.get("versao_nova"):
+            self._sinal_status_update.emit("#64748B", f"v{versao_local} · sem conexão")
+            return
+
+        if not info.get("disponivel"):
+            self._sinal_status_update.emit("#22C55E", f"v{versao_local} · atualizado")
+            return
+
+        versao_nova = info["versao_nova"]
+        url = info["url_download"]
+        self._sinal_status_update.emit("#F59E0B", f"v{versao_nova} disponível · baixando...")
+
+        try:
+            def _cb(baixados, total):
+                if total > 0:
+                    pct = int(baixados / total * 100)
+                    self._sinal_status_update.emit(
+                        "#F59E0B", f"Baixando v{versao_nova}… {pct}%"
+                    )
+
+            import updater as _upd
+            _upd.aplicar_atualizacao(url, versao_nova, callback_progresso=_cb)
+        except Exception:
+            self._sinal_status_update.emit("#64748B", f"v{versao_local} · erro ao baixar")
+            return
+
+        self._sinal_status_update.emit("#22C55E", f"v{versao_nova} · reiniciando...")
+        self._sinal_restart.emit()
+
+    def _ao_reiniciar(self):
+        from PySide6.QtCore import QTimer
+        QTimer.singleShot(1500, self._executar_restart)
+
+    def _executar_restart(self):
+        import updater
+        updater.reiniciar()
