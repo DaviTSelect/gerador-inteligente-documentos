@@ -1,10 +1,8 @@
 """
 pdf.py — Conversão de documentos Word para PDF.
 
-Usa a biblioteca docx2pdf que aciona o Microsoft Word via automação COM.
+Usa win32com.client para acionar o Microsoft Word via automação COM.
 Requer que o Microsoft Word esteja instalado no Windows.
-
-Se Word não estiver instalado, as funções levantam um erro com mensagem clara.
 """
 import os
 
@@ -14,9 +12,6 @@ def converter_para_pdf(caminho_docx: str) -> str:
     Converte um arquivo .docx para PDF no mesmo diretório.
 
     Requer Microsoft Word instalado no Windows.
-
-    Parâmetros:
-        caminho_docx: caminho absoluto ou relativo para o arquivo .docx
 
     Retorna:
         Caminho do arquivo PDF gerado (mesma pasta, mesmo nome, extensão .pdf)
@@ -28,16 +23,35 @@ def converter_para_pdf(caminho_docx: str) -> str:
     if not os.path.exists(caminho_docx):
         raise FileNotFoundError(f"Arquivo não encontrado: {caminho_docx}")
 
-    caminho_pdf = os.path.splitext(caminho_docx)[0] + ".pdf"
+    caminho_abs = os.path.abspath(caminho_docx)
+    caminho_pdf = os.path.splitext(caminho_abs)[0] + ".pdf"
 
     try:
-        from docx2pdf import convert
-        convert(caminho_docx, caminho_pdf)
+        import win32com.client
+        word = win32com.client.Dispatch("Word.Application")
+        word.Visible = False
+        try:
+            doc = word.Documents.Open(caminho_abs)
+            doc.SaveAs(caminho_pdf, FileFormat=17)  # 17 = wdFormatPDF
+            doc.Close(False)
+        finally:
+            word.Quit()
     except ImportError:
-        raise RuntimeError(
-            "A biblioteca docx2pdf não está instalada.\n"
-            "Execute: pip install docx2pdf"
-        )
+        # Fallback: tenta docx2pdf se win32com não estiver disponível
+        try:
+            from docx2pdf import convert
+            convert(caminho_abs, caminho_pdf)
+        except ImportError:
+            raise RuntimeError(
+                "Nenhuma biblioteca de conversão disponível.\n"
+                "Execute: pip install pywin32  ou  pip install docx2pdf"
+            )
+        except Exception as e:
+            raise RuntimeError(
+                f"Falha ao converter '{os.path.basename(caminho_docx)}' para PDF.\n"
+                f"Verifique se o Microsoft Word está instalado.\n"
+                f"Detalhe técnico: {e}"
+            )
     except Exception as e:
         raise RuntimeError(
             f"Falha ao converter '{os.path.basename(caminho_docx)}' para PDF.\n"
@@ -54,14 +68,6 @@ def converter_em_lote(lista_caminhos: list, callback=None) -> list[str]:
 
     Se um arquivo falhar, o erro é registrado e a conversão continua
     para os demais arquivos.
-
-    Parâmetros:
-        lista_caminhos: lista de caminhos para arquivos .docx
-        callback: função opcional chamada após cada conversão
-                  assinatura: callback(atual: int, total: int, nome: str)
-
-    Retorna:
-        Lista de caminhos dos PDFs gerados com sucesso
     """
     gerados = []
     total = len(lista_caminhos)
@@ -72,7 +78,6 @@ def converter_em_lote(lista_caminhos: list, callback=None) -> list[str]:
             caminho_pdf = converter_para_pdf(caminho)
             gerados.append(caminho_pdf)
         except Exception:
-            # Registra o erro mas continua os demais
             pass
 
         if callback:

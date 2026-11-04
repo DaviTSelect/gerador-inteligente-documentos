@@ -75,10 +75,17 @@ def _substituir_em_paragrafos(paragrafos, dados: dict) -> None:
         # Substitui todas as variáveis no texto do primeiro run
         def substituir(match):
             nome_var = match.group(1)
-            # Variável não mapeada → string vazia (não deixa {{VAR}} no doc)
             return dados.get(nome_var, "")
 
         para.runs[0].text = PADRAO_VARIAVEL.sub(substituir, para.runs[0].text)
+
+        # Remove cor explícita do run para herdar a cor padrão do parágrafo
+        # (evita que a cor de marcação do placeholder apareça no documento final)
+        rPr = para.runs[0]._r.find(qn("w:rPr"))
+        if rPr is not None:
+            color_elem = rPr.find(qn("w:color"))
+            if color_elem is not None:
+                rPr.remove(color_elem)
 
 
 def _substituir_em_tabelas(tabelas, dados: dict) -> None:

@@ -1187,9 +1187,9 @@ class PaginaDestino(QWidget):
         """)
         self.campo_pasta.textChanged.connect(self._atualizar_previa)
 
-        btn_pasta = QPushButton("📂")
-        btn_pasta.setFixedSize(36, 36)
-        btn_pasta.setStyleSheet(estilo_botao_secundario())
+        btn_pasta = QPushButton("📂  Selecionar pasta")
+        btn_pasta.setFixedHeight(36)
+        btn_pasta.setStyleSheet(estilo_botao_primario())
         btn_pasta.clicked.connect(self._selecionar_pasta)
 
         row_pasta.addWidget(self.campo_pasta)
@@ -1510,15 +1510,9 @@ class ThreadGeracao(QThread):
                     import re
                     val_safe = re.sub(r'[<>:"/\\|?*]', '_', str(val))
                     nome_arquivo = nome_arquivo.replace(f"{{{{{var}}}}}", val_safe)
-                # Garantir extensão .docx
-                if not nome_arquivo.lower().endswith(".docx"):
-                    nome_arquivo += ".docx"
-
-                # Garantir extensão correta no nome de saída
-                sufixo_esperado = ".pdf" if converter_pdf else ".docx"
-                base_nome = nome_arquivo
+                # Remove qualquer extensão (.pdf, .docx) que esteja no padrão
                 import re as _re
-                base_nome = _re.sub(r'\.[a-zA-Z0-9]{1,5}$', '', base_nome)
+                base_nome = _re.sub(r'\.(pdf|docx)$', '', nome_arquivo, flags=_re.IGNORECASE).strip()
                 if not base_nome:
                     base_nome = f"Documento_{i + 1}"
 
