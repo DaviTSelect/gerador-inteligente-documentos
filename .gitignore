@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+dist/
+build/
+*.spec
+*.egg-info/
+
+# Ambientes virtuais
+venv/
+env/
+.venv/
+
+# Testes
+.pytest_cache/
+.coverage
+
+# IDEs
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Superpowers (planos internos)
+.superpowers/
+
+# Arquivos temporários do updater
+_update_replace.bat
+*.new
+
+# Saída gerada
+saida/
+output/
