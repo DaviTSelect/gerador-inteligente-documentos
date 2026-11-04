@@ -4,33 +4,55 @@ echo ===================================================
 echo  Build — Gerador Inteligente de Documentos
 echo ===================================================
 
-REM Lê a versão atual
 set /p VERSION=<version.txt
 set VERSION=%VERSION: =%
-echo Versão: %VERSION%
+echo Versao: %VERSION%
 
-REM Verifica dependências de build
-python -c "import PyInstaller" 2>nul
-if errorlevel 1 (
-    echo Instalando PyInstaller...
-    pip install pyinstaller
+REM Cria o venv se não existir
+if not exist "venv\Scripts\python.exe" (
+    echo Criando ambiente virtual...
+    python -m venv venv
+)
+
+REM Instala/atualiza dependências no venv
+echo Instalando dependencias...
+venv\Scripts\python.exe -m pip install -r requirements.txt --quiet
+venv\Scripts\python.exe -m pip install pyinstaller --quiet
+
+REM Limpa builds anteriores
+if exist build rmdir /s /q build
+if exist dist  rmdir /s /q dist
+if exist GeradorDocumentos.spec del GeradorDocumentos.spec
+
+REM Detecta logo.ico
+set ICO_FLAG=
+set ICO_DATA=
+if exist "..\logo.ico" (
+    set ICO_FLAG=--icon=..\logo.ico
+    set ICO_DATA=--add-data=..\logo.ico;.
+) else if exist "logo.ico" (
+    set ICO_FLAG=--icon=logo.ico
+    set ICO_DATA=--add-data=logo.ico;.
 )
 
 echo.
-echo Gerando executável...
+echo Gerando executavel v%VERSION%...
 echo.
 
-pyinstaller ^
-  --onefile ^
-  --windowed ^
-  --icon=logo.ico ^
-  --name="GeradorDocumentos" ^
-  --add-data="version.txt;." ^
-  --add-data="logo.ico;." ^
-  --hidden-import=docx2pdf ^
-  --hidden-import=chardet ^
-  --hidden-import=openpyxl ^
-  main.py
+venv\Scripts\python.exe -m PyInstaller ^
+    --onefile ^
+    --windowed ^
+    --name=GeradorDocumentos ^
+    --add-data=version.txt;. ^
+    --collect-all=chardet ^
+    --collect-all=docx2pdf ^
+    --hidden-import=openpyxl ^
+    --hidden-import=openpyxl.cell._writer ^
+    --hidden-import=pandas ^
+    --hidden-import=docx ^
+    %ICO_FLAG% ^
+    %ICO_DATA% ^
+    main.py
 
 if errorlevel 1 (
     echo.
@@ -39,15 +61,12 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo.
-echo ===================================================
-echo  Build concluído com sucesso!
-echo  Executável: dist\GeradorDocumentos.exe
-echo  Versão:     %VERSION%
-echo ===================================================
-echo.
-
-REM Copia version.txt para dist/ junto com o exe
 copy version.txt dist\version.txt >nul 2>&1
 
+echo.
+echo ===================================================
+echo  Build concluido!
+echo  Executavel : dist\GeradorDocumentos.exe
+echo  Versao     : %VERSION%
+echo ===================================================
 pause
