@@ -1760,7 +1760,7 @@ class PaginaGeracao(QWidget):
     def _abrir_pasta(self):
         pasta = self.config.get("pasta", "")
         if pasta and os.path.exists(pasta):
-            subprocess.Popen(f'explorer "{pasta}"')
+            os.startfile(pasta)
 
 
 # ── Janela Principal ─────────────────────────────────────────────────────────
