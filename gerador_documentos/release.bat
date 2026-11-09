@@ -8,11 +8,15 @@ echo ============================================
 if exist "venv\Scripts\python.exe" (
     set PY=venv\Scripts\python.exe
     set PIP=venv\Scripts\pip.exe
-    set PYINST=venv\Scripts\pyinstaller.exe
+    set PYINST=venv\Scripts\python.exe -m PyInstaller
+) else if exist "..\venv\Scripts\python.exe" (
+    set PY=..\venv\Scripts\python.exe
+    set PIP=..\venv\Scripts\pip.exe
+    set PYINST=..\venv\Scripts\python.exe -m PyInstaller
 ) else (
     set PY=python
     set PIP=pip
-    set PYINST=pyinstaller
+    set PYINST=python -m PyInstaller
 )
 
 set /p VERSION=<version.txt
@@ -44,7 +48,7 @@ if %ERRORLEVEL% neq 0 ( echo ERRO ao instalar dependencias & pause & exit /b 1 )
 
 echo [2/5] Executando testes...
 %PY% -m pytest tests -q 2>nul
-if %ERRORLEVEL% neq 0 ( echo ERRO nos testes & pause & exit /b 1 )
+if errorlevel 1 ( echo ERRO nos testes & pause & exit /b 1 )
 
 echo [3/5] Compilando executavel...
 if exist dist rmdir /s /q dist
