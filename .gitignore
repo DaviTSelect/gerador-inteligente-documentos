@@ -6,6 +6,7 @@ __pycache__/
 dist/
 build/
 *.spec
+!gerador_documentos/GeradorDocumentos.spec
 *.egg-info/
 
 # Ambientes virtuais
