@@ -196,16 +196,31 @@ def _aplicar_exe(caminho_novo_exe: str):
     novo_exe_copia = exe_atual + ".new"
     shutil.copy2(caminho_novo_exe, novo_exe_copia)
 
-    # O bat fica na pasta do exe (não em _MEIPASS, que é deletado na saída)
+    # O bat fica na pasta do exe (não em _MEIPASS, que é deletado na saída).
+    #
+    # Estratégia de substituição via RENAME (não move/copy):
+    # O Windows Defender mantém um handle no exe recém-executado por vários
+    # segundos/minutos após o processo encerrar, impedindo move e copy com
+    # "Acesso negado". No NTFS, RENAME funciona mesmo com o arquivo bloqueado
+    # porque apenas altera a entrada de diretório, sem acessar o conteúdo.
+    # Fluxo: ren exe → exe.old  |  ren exe.new → exe  |  start exe
+    exe_nome = os.path.basename(exe_atual)
+    exe_old  = exe_atual + ".old"
     bat = os.path.join(exe_dir, "_update_replace.bat")
     with open(bat, "w", encoding="ascii") as f:
         f.write("@echo off\n")
-        # Tenta substituir o exe a cada 2 s até conseguir (arquivo pode ainda estar em uso)
+        # Aguarda o processo encerrar antes do primeiro rename
+        f.write("timeout /t 3 /nobreak >nul\n")
+        # Tenta renomear o exe antigo (libera o nome); retenta a cada 2 s
         f.write(":retry\n")
-        f.write("timeout /t 2 /nobreak >nul\n")
-        f.write(f'move /y "{novo_exe_copia}" "{exe_atual}" >nul 2>&1\n')
-        f.write("if errorlevel 1 goto retry\n")
+        f.write(f'ren "{exe_atual}" "{exe_nome}.old" >nul 2>&1\n')
+        f.write("if errorlevel 1 ( timeout /t 2 /nobreak >nul & goto retry )\n")
+        # Renomeia o novo exe para o nome original
+        f.write(f'ren "{novo_exe_copia}" "{exe_nome}" >nul 2>&1\n')
+        # Inicia o novo exe
         f.write(f'start "" "{exe_atual}"\n')
+        # Tenta apagar o .old (pode falhar se Defender ainda segura; ignora)
+        f.write(f'del /f /q "{exe_old}" >nul 2>&1\n')
         f.write('del "%~f0"\n')
 
     subprocess.Popen(["cmd", "/c", bat], shell=False,

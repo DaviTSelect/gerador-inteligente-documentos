@@ -7,6 +7,11 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.1.7] - 2026-11-23
+
+### Corrigido
+- **Substituição do exe bloqueada pelo Windows Defender**: `move` e `copy` falham com "Acesso negado" porque o Defender mantém um handle no exe recém-executado. No NTFS, `ren` funciona mesmo com o arquivo bloqueado (altera apenas a entrada de diretório). Novo fluxo: `ren exe → exe.old` | `ren exe.new → exe` | `start exe`. O `.old` é apagado ao final (ou descartado silenciosamente se ainda bloqueado).
+
 ## [1.1.6] - 2026-11-23
 
 ### Corrigido
