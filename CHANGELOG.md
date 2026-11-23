@@ -7,6 +7,11 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.1.5] - 2026-11-23
+
+### Teste
+- Versão de validação do fluxo de atualização automática após correções da v1.1.4
+
 ## [1.1.4] - 2026-11-23
 
 ### Corrigido
