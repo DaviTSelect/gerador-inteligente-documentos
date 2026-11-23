@@ -7,6 +7,12 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.1.2] - 2026-11-23
+
+### Corrigido
+- `gerador_documentos/requirements.txt`: pin `chardet<5.0` — chardet 5.x usa extensões `_mypyc` compiladas que o PyInstaller não coleta, causando crash "No module named 'chardet.pipeline.confusion_mypyc'"
+- `gerador_documentos/GeradorDocumentos.spec`: `collect_all('lxml')` restaurado — havia sido removido acidentalmente; a ausência causaria crash "cannot import name 'etree' from 'lxml'"
+
 ## [1.1.1] - 2026-11-12
 
 ### Corrigido
