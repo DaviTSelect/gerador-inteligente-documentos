@@ -7,6 +7,12 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.1.6] - 2026-11-23
+
+### Corrigido
+- **Segunda janela ao atualizar**: `QTimer.singleShot` chamado de thread de background não é thread-safe no Qt — o timer nunca disparava, o app não fechava, e o bat abria uma segunda instância. Corrigido usando sempre o sinal `_sinal_restart` (emitido cross-thread via Qt) + flag `_exe_update` para distinguir "fechar" de "reiniciar".
+- **Bat sem retry**: se o `move` falhasse (exe ainda em uso), o bat iniciava o exe antigo sem tentar novamente. Agora tenta a cada 2 s até o `move` ter sucesso.
+
 ## [1.1.5] - 2026-11-23
 
 ### Teste

@@ -200,9 +200,11 @@ def _aplicar_exe(caminho_novo_exe: str):
     bat = os.path.join(exe_dir, "_update_replace.bat")
     with open(bat, "w", encoding="ascii") as f:
         f.write("@echo off\n")
-        # Aguarda o processo atual terminar antes de tentar substituir o exe
-        f.write("timeout /t 5 /nobreak >nul\n")
-        f.write(f'move /y "{novo_exe_copia}" "{exe_atual}"\n')
+        # Tenta substituir o exe a cada 2 s até conseguir (arquivo pode ainda estar em uso)
+        f.write(":retry\n")
+        f.write("timeout /t 2 /nobreak >nul\n")
+        f.write(f'move /y "{novo_exe_copia}" "{exe_atual}" >nul 2>&1\n')
+        f.write("if errorlevel 1 goto retry\n")
         f.write(f'start "" "{exe_atual}"\n')
         f.write('del "%~f0"\n')
 

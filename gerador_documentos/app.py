@@ -1794,6 +1794,7 @@ class MainWindow(QMainWindow):
         self.ir_para_etapa(1)
         self._sinal_status_update.connect(self.sidebar.atualizar_status_atualizacao)
         self._sinal_restart.connect(self._ao_reiniciar)
+        self._exe_update = False  # True quando atualização via .exe (bat cuida do restart)
 
     def _aplicar_icone(self):
         import os, sys
@@ -1936,19 +1937,21 @@ class MainWindow(QMainWindow):
             self._sinal_status_update.emit("#64748B", f"v{versao_local} · erro ao baixar")
             return
 
+        # _exe_update deve ser definido antes de emitir o sinal (lido na main thread)
+        self._exe_update = not precisa_reiniciar
         self._sinal_status_update.emit("#22C55E", f"v{versao_nova} · reiniciando...")
-        if precisa_reiniciar:
-            # Atualização via ZIP: o app precisa se reiniciar
-            self._sinal_restart.emit()
-        else:
-            # Atualização via EXE: o bat já agenda o restart; apenas fechar
-            from PySide6.QtCore import QTimer
-            from PySide6.QtWidgets import QApplication
-            QTimer.singleShot(1500, QApplication.instance().quit)
+        # Sempre usa o sinal Qt para garantir execução na main thread (thread-safe)
+        self._sinal_restart.emit()
 
     def _ao_reiniciar(self):
         from PySide6.QtCore import QTimer
-        QTimer.singleShot(1500, self._executar_restart)
+        from PySide6.QtWidgets import QApplication
+        if self._exe_update:
+            # Atualização via .exe: bat já vai iniciar o novo exe; só fechar
+            QTimer.singleShot(1500, QApplication.instance().quit)
+        else:
+            # Atualização via .zip: precisa reiniciar o próprio processo
+            QTimer.singleShot(1500, self._executar_restart)
 
     def _executar_restart(self):
         import updater
