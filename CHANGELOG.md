@@ -7,6 +7,14 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.1.4] - 2026-11-23
+
+### Corrigido
+- **Loop de atualização infinita**: `reiniciar()` era chamado mesmo em atualizações via `.exe`, relançando o executável antigo antes do bat conseguir substituí-lo. Agora `aplicar_atualizacao` retorna `False` para `.exe` e o app apenas fecha — o bat cuida do restart.
+- **Bat criado em `_MEIPASS`**: o script de substituição era salvo dentro da pasta temporária do PyInstaller, que é deletada ao encerrar. Corrigido para salvar na pasta do executável.
+- **Timeout do bat insuficiente**: aumentado de 2 s para 5 s para garantir que o processo encerrou antes de substituir o exe.
+- **lxml.etree ausente no bundle**: `collect_all('lxml')` não captura os `.pyd` no lxml 6.x. Substituído por coleta explícita dos binários.
+
 ## [1.1.3] - 2026-11-23
 
 ### Teste

@@ -1931,13 +1931,20 @@ class MainWindow(QMainWindow):
                     )
 
             import updater as _upd
-            _upd.aplicar_atualizacao(url, versao_nova, callback_progresso=_cb)
+            precisa_reiniciar = _upd.aplicar_atualizacao(url, versao_nova, callback_progresso=_cb)
         except Exception:
             self._sinal_status_update.emit("#64748B", f"v{versao_local} · erro ao baixar")
             return
 
         self._sinal_status_update.emit("#22C55E", f"v{versao_nova} · reiniciando...")
-        self._sinal_restart.emit()
+        if precisa_reiniciar:
+            # Atualização via ZIP: o app precisa se reiniciar
+            self._sinal_restart.emit()
+        else:
+            # Atualização via EXE: o bat já agenda o restart; apenas fechar
+            from PySide6.QtCore import QTimer
+            from PySide6.QtWidgets import QApplication
+            QTimer.singleShot(1500, QApplication.instance().quit)
 
     def _ao_reiniciar(self):
         from PySide6.QtCore import QTimer

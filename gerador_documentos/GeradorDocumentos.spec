@@ -1,4 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
+import glob
+import os
+import lxml as _lxml_pkg
 from PyInstaller.utils.hooks import collect_all
 
 datas = [('version.txt', '.'), ('../logo.ico', '.')]
@@ -8,8 +11,10 @@ tmp_ret = collect_all('chardet')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('docx2pdf')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
-tmp_ret = collect_all('lxml')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+# lxml: collect_all não captura os .pyd em lxml 6.x; coleta explícita
+_lxml_dir = os.path.dirname(_lxml_pkg.__file__)
+binaries += [(p, 'lxml') for p in glob.glob(os.path.join(_lxml_dir, '*.pyd'))]
+hiddenimports += ['lxml.etree', 'lxml._elementpath', 'lxml.builder', 'lxml.objectify']
 
 
 a = Analysis(

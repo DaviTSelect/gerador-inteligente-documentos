@@ -134,7 +134,9 @@ def aplicar_atualizacao(url_download: str, versao_nova: str,
     Baixa e aplica a atualização.
 
     callback_progresso(bytes_baixados, total) chamado durante o download.
-    Retorna True em caso de sucesso.
+    Retorna True  → atualização via ZIP; chamador deve chamar reiniciar().
+    Retorna False → atualização via EXE; o bat já agenda restart; chamador
+                    deve apenas fechar o app (NÃO chamar reiniciar()).
     """
     nome_arq = url_download.split("/")[-1].split("?")[0]
 
@@ -147,9 +149,10 @@ def aplicar_atualizacao(url_download: str, versao_nova: str,
 
         elif nome_arq.lower().endswith(".exe"):
             _aplicar_exe(caminho_tmp)
-            return True  # reinício é agendado no _aplicar_exe
+            # O bat cuida do restart — o chamador só deve fechar o app.
+            return False
 
-    # Atualiza version.txt local
+    # Atualiza version.txt local (somente para atualização via ZIP)
     with open(VERSION_FILE, "w", encoding="utf-8") as f:
         f.write(versao_nova + "\n")
 
@@ -188,14 +191,17 @@ def _aplicar_exe(caminho_novo_exe: str):
     if not exe_atual:
         return
 
-    # Copia o novo .exe para fora do tempdir (que será apagado)
+    # Copia o novo .exe para a mesma pasta do executável atual
+    exe_dir = os.path.dirname(exe_atual)
     novo_exe_copia = exe_atual + ".new"
     shutil.copy2(caminho_novo_exe, novo_exe_copia)
 
-    bat = os.path.join(_PASTA_BASE, "_update_replace.bat")
+    # O bat fica na pasta do exe (não em _MEIPASS, que é deletado na saída)
+    bat = os.path.join(exe_dir, "_update_replace.bat")
     with open(bat, "w", encoding="ascii") as f:
         f.write("@echo off\n")
-        f.write("timeout /t 2 /nobreak >nul\n")
+        # Aguarda o processo atual terminar antes de tentar substituir o exe
+        f.write("timeout /t 5 /nobreak >nul\n")
         f.write(f'move /y "{novo_exe_copia}" "{exe_atual}"\n')
         f.write(f'start "" "{exe_atual}"\n')
         f.write('del "%~f0"\n')
