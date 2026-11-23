@@ -7,6 +7,11 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.1.3] - 2026-11-23
+
+### Teste
+- Versão de validação do fluxo de atualização automática após correção do crash chardet/lxml (v1.1.2)
+
 ## [1.1.2] - 2026-11-23
 
 ### Corrigido
