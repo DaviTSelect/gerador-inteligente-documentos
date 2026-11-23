@@ -217,6 +217,8 @@ def _aplicar_exe(caminho_novo_exe: str):
         f.write("if errorlevel 1 ( timeout /t 2 /nobreak >nul & goto retry )\n")
         # Renomeia o novo exe para o nome original
         f.write(f'ren "{novo_exe_copia}" "{exe_nome}" >nul 2>&1\n')
+        # Remove diretórios _MEI* antigos ao lado do exe (extração stale do PyInstaller)
+        f.write(f'for /d %%d in ("{exe_dir}\\_MEI*") do rd /s /q "%%d" >nul 2>&1\n')
         # Inicia o novo exe
         f.write(f'start "" "{exe_atual}"\n')
         # Tenta apagar o .old (pode falhar se Defender ainda segura; ignora)

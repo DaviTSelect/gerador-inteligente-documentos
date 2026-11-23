@@ -7,6 +7,11 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.1.9] - 2026-11-23
+
+### Corrigido
+- **"Failed to load Python DLL" ao reiniciar após update**: o PyInstaller reutilizava um diretório `_MEI*` antigo/corrompido no `%TEMP%`, onde `python312.dll` estava ausente. Corrigido com `runtime_tmpdir='.'` no spec (extração ao lado do exe, não em `%TEMP%`) e limpeza dos `_MEI*` antigos no bat antes de iniciar o novo exe.
+
 ## [1.1.8] - 2026-11-23
 
 ### Teste
