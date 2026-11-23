@@ -7,6 +7,11 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.1.8] - 2026-11-23
+
+### Teste
+- Versão de validação do fluxo de atualização automática após correção do rename (v1.1.7)
+
 ## [1.1.7] - 2026-11-23
 
 ### Corrigido
