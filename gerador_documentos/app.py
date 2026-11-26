@@ -828,12 +828,9 @@ class MapeamentoLinha(QWidget):
 
     def _tentar_auto_selecao(self):
         """Tenta selecionar automaticamente a coluna com nome similar à variável."""
-        var_lower = self.variavel.lower()
-        for i, col in enumerate(self.colunas):
-            col_lower = col.lower().replace(" ", "_").replace("-", "_")
-            if var_lower in col_lower or col_lower in var_lower:
-                self.combo_coluna.setCurrentIndex(i + 1)
-                break
+        indice = planilhas.sugerir_coluna(self.variavel, self.colunas)
+        if indice is not None:
+            self.combo_coluna.setCurrentIndex(indice + 1)
 
     def _ao_mudar_coluna(self, coluna: str):
         if coluna == "— selecionar —" or coluna not in self.primeiro_registro:

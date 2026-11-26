@@ -31,12 +31,15 @@ def _verificar_instalacao(versao_esperada: str = "") -> int:
     abre e que o essencial funciona (importações, Qt, .docx, version.txt).
     """
     import io
+    import ssl
 
+    import truststore
     import win32com.client  # noqa: F401
     from docx import Document
 
     QApplication(sys.argv)
     Document().save(io.BytesIO())
+    truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)  # sem isto não há como atualizar
     versao = updater.versao_para_tupla(updater.ler_versao_local())
     if versao in (None, (0, 0, 0, 0)):
         return 1

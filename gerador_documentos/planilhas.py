@@ -6,6 +6,7 @@ para que o documento Word fique com dados legíveis e bem formatados.
 """
 import math
 import re
+import unicodedata
 from datetime import date, datetime
 
 import chardet
@@ -35,6 +36,37 @@ _MESES_PT = [
     "", "janeiro", "fevereiro", "março", "abril", "maio", "junho",
     "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
 ]
+
+
+# ── Sugestão de coluna para cada variável do modelo ──────────────────────────
+
+def _palavras(nome: str) -> list[str]:
+    """'Data-Início' → ['data', 'inicio']."""
+    sem_acento = unicodedata.normalize("NFKD", str(nome)).encode("ascii", "ignore").decode()
+    return re.findall(r"[a-z0-9]+", sem_acento.lower())
+
+
+def sugerir_coluna(variavel: str, colunas: list[str]) -> int | None:
+    """
+    Índice da coluna mais parecida com a variável, ou None.
+
+    Prioridade: mesmo nome; mesmas palavras em outra ordem
+    (Valor_PSU → PSU_VALOR); um nome contido no outro.
+    """
+    alvo = _palavras(variavel)
+    if not alvo:
+        return None
+    candidatas = [_palavras(col) for col in colunas]
+
+    for criterio in (
+        lambda p: p == alvo,
+        lambda p: sorted(p) == sorted(alvo),
+        lambda p: bool(p) and ("_".join(alvo) in "_".join(p) or "_".join(p) in "_".join(alvo)),
+    ):
+        for indice, palavras in enumerate(candidatas):
+            if criterio(palavras):
+                return indice
+    return None
 
 
 # ── Helpers internos ─────────────────────────────────────────────────────────

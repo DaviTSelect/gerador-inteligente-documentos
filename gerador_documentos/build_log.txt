@@ -1,0 +1,306 @@
+﻿python.exe : 142 INFO: PyInstaller: 6.22.3, contrib hooks: 2026.9
+No linha:29 caractere:1
++ & .\venv\Scripts\python.exe @cmdArgs 2>&1 | Tee-Object -FilePath "bui ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (142 INFO: PyIns...b hooks: 2026.9:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+142 INFO: Python: 3.12.10
+197 INFO: Platform: Windows-11-10.0.26200-SP0
+197 INFO: Python environment: C:\Users\DaviTorresdeSousa\OneDrive - Facto\novo\Automações\Nova 
+pasta\gerador_documentos\venv
+204 INFO: wrote C:\Users\DaviTorresdeSousa\OneDrive - Facto\novo\Automações\Nova 
+pasta\gerador_documentos\GeradorDocumentos.spec
+7059 INFO: Module search paths (PYTHONPATH):
+['C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova '
+ 'pasta\\gerador_documentos',
+ 'C:\\Program '
+ 'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\\python312.zip',
+ 'C:\\Program '
+ 'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\\DLLs',
+ 'C:\\Program '
+ 'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\\Lib',
+ 'C:\\Program '
+ 'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0',
+ 'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova '
+ 'pasta\\gerador_documentos\\venv',
+ 'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova '
+ 'pasta\\gerador_documentos\\venv\\Lib\\site-packages',
+ 'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova '
+ 'pasta\\gerador_documentos\\venv\\Lib\\site-packages\\win32',
+ 'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova '
+ 'pasta\\gerador_documentos\\venv\\Lib\\site-packages\\win32\\lib',
+ 'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova '
+ 'pasta\\gerador_documentos\\venv\\Lib\\site-packages\\pythonwin',
+ 'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova '
+ 'pasta\\gerador_documentos']
+14229 INFO: Appending 'datas' from .spec
+14247 INFO: checking Analysis
+14248 INFO: Building Analysis because Analysis-00.toc is non existent
+14248 INFO: Looking for Python shared library...
+14248 INFO: Using Python shared library: C:\Program 
+Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\python312.dll
+14248 INFO: Running Analysis Analysis-00.toc
+14248 INFO: Target bytecode optimization level: 0
+14248 INFO: Initializing module dependency graph...
+14255 INFO: Initializing module graph hook caches...
+14297 INFO: Analyzing modules for base_library.zip ...
+16191 INFO: Processing standard module hook 'hook-encodings.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+16958 INFO: Processing standard module hook 'hook-math.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+18421 INFO: Processing standard module hook 'hook-pickle.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+20010 INFO: Processing standard module hook 'hook-heapq.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+21134 INFO: Caching module dependency graph...
+21167 INFO: Analyzing C:\Users\DaviTorresdeSousa\OneDrive - Facto\novo\Automações\Nova pasta\gerador_documentos\main.py
+21192 INFO: Processing standard module hook 'hook-PySide6.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+22141 INFO: Processing standard module hook 'hook-shiboken6.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+22317 INFO: Processing standard module hook 'hook-PySide6.QtNetwork.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+25618 INFO: Processing standard module hook 'hook-PySide6.QtCore.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+30964 INFO: Processing standard module hook 'hook-PySide6.QtGui.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+56200 INFO: Processing standard module hook 'hook-PySide6.QtWidgets.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+61479 INFO: Processing standard module hook 'hook-docx.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+61626 INFO: Processing pre-safe-import-module hook 'hook-typing_extensions.py' from 
+'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+61669 INFO: SetuptoolsInfo: initializing cached setuptools info...
+65015 INFO: Processing standard module hook 'hook-multiprocessing.util.py' from 
+'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+65188 INFO: Processing standard module hook 'hook-xml.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+65658 INFO: Processing standard module hook 'hook-_ctypes.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+66149 INFO: Processing standard module hook 'hook-lxml.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+67568 INFO: Processing standard module hook 'hook-lxml.etree.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+68881 INFO: Processing standard module hook 'hook-chardet.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+71937 INFO: Processing standard module hook 'hook-openpyxl.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+72204 INFO: Processing standard module hook 'hook-numpy.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+73249 INFO: Processing standard module hook 'hook-platform.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+73374 INFO: Processing standard module hook 'hook-sysconfig.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+73641 INFO: Processing standard module hook 'hook-webbrowser.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+76502 INFO: Processing standard module hook 'hook-difflib.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+78490 INFO: Processing standard module hook 'hook-xml.etree.cElementTree.py' from 
+'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+79592 INFO: Processing standard module hook 'hook-pandas.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+93928 INFO: Processing standard module hook 'hook-zoneinfo.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+97938 INFO: Processing standard module hook 'hook-pandas.io.formats.style.py' from 
+'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+104761 INFO: Processing standard module hook 'hook-pandas.plotting.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+105603 INFO: Processing standard module hook 'hook-dateutil.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+107664 INFO: Processing standard module hook 'hook-xml.dom.domreg.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+108778 INFO: Processing standard module hook 'hook-sqlite3.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+109744 INFO: Processing standard module hook 'hook-pandas.io.clipboard.py' from 
+'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+110093 INFO: Processing standard module hook 'hook-pytest.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+114402 INFO: Processing standard module hook 'hook-pygments.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+117028 INFO: Processing standard module hook 'hook-py.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+117740 INFO: Processing pre-safe-import-module hook 'hook-packaging.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+118229 INFO: Processing pre-safe-import-module hook 'hook-tomli.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+118270 INFO: Setuptools: 'tomli' appears to be a setuptools-vendored copy - creating alias to 
+'setuptools._vendor.tomli'!
+118288 INFO: Processing standard module hook 'hook-setuptools.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+118349 INFO: Processing pre-safe-import-module hook 'hook-distutils.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+118449 INFO: Processing pre-safe-import-module hook 'hook-jaraco.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+118486 INFO: Setuptools: 'jaraco' appears to be a full setuptools-vendored copy - creating alias to 
+'setuptools._vendor.jaraco'!
+118517 INFO: Processing pre-safe-import-module hook 'hook-more_itertools.py' from 
+'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+118549 INFO: Setuptools: 'more_itertools' appears to be a setuptools-vendored copy - creating alias to 
+'setuptools._vendor.more_itertools'!
+118800 INFO: Processing standard module hook 'hook-_osx_support.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+119447 INFO: Processing standard module hook 'hook-setuptools._vendor.jaraco.text.py' from 
+'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+119469 INFO: Processing pre-safe-import-module hook 'hook-importlib_resources.py' from 
+'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+119507 INFO: Processing pre-safe-import-module hook 'hook-backports.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+119534 INFO: Setuptools: 'backports' appears to be a full setuptools-vendored copy - creating alias to 
+'setuptools._vendor.backports'!
+120915 INFO: Processing pre-safe-import-module hook 'hook-wheel.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+120936 INFO: Setuptools: 'wheel' appears to be a setuptools-vendored copy - creating alias to 
+'setuptools._vendor.wheel'!
+123127 INFO: Processing standard module hook 'hook-docx2pdf.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+123276 INFO: Processing pre-safe-import-module hook 'hook-importlib_metadata.py' from 
+'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+123296 INFO: Setuptools: 'importlib_metadata' appears to be a setuptools-vendored copy - creating alias to 
+'setuptools._vendor.importlib_metadata'!
+123331 INFO: Processing standard module hook 'hook-setuptools._vendor.importlib_metadata.py' from 
+'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+123376 INFO: Processing pre-safe-import-module hook 'hook-zipp.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+123395 INFO: Setuptools: 'zipp' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.zipp'!
+123476 INFO: Processing pre-safe-import-module hook 'hook-win32com.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\pre_safe_import_module'
+124340 INFO: Processing standard module hook 'hook-win32com.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+124376 INFO: Processing standard module hook 'hook-pythoncom.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+124751 INFO: Processing standard module hook 'hook-pywintypes.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+125951 INFO: Analyzing hidden import 'chardet.__main__'
+125973 INFO: Analyzing hidden import 'chardet.equivalences'
+125998 INFO: Analyzing hidden import 'chardet.models._format__mypyc'
+125998 INFO: Analyzing hidden import 'chardet.pipeline.ascii__mypyc'
+125998 INFO: Analyzing hidden import 'chardet.pipeline.confusion__mypyc'
+125998 INFO: Analyzing hidden import 'chardet.pipeline.escape__mypyc'
+125998 INFO: Analyzing hidden import 'chardet.pipeline.language__mypyc'
+125998 INFO: Analyzing hidden import 'chardet.pipeline.magic__mypyc'
+125998 INFO: Analyzing hidden import 'chardet.pipeline.markup__mypyc'
+125998 INFO: Analyzing hidden import 'chardet.pipeline.orchestrator__mypyc'
+125998 INFO: Analyzing hidden import 'chardet.pipeline.postprocess__mypyc'
+125998 INFO: Analyzing hidden import 'chardet.pipeline.statistical__mypyc'
+125998 INFO: Analyzing hidden import 'chardet.pipeline.structural__mypyc'
+125998 INFO: Analyzing hidden import 'chardet.pipeline.utf1632__mypyc'
+125998 INFO: Analyzing hidden import 'chardet.pipeline.utf8__mypyc'
+125998 INFO: Analyzing hidden import 'chardet.pipeline.validity__mypyc'
+125998 INFO: Analyzing hidden import 'chardet.universaldetector'
+126018 INFO: Processing module hooks (post-graph stage)...
+126030 WARNING: Hidden import "_format__mypyc" not found!
+126031 WARNING: Hidden import "ascii__mypyc" not found!
+126033 WARNING: Hidden import "confusion__mypyc" not found!
+126033 WARNING: Hidden import "escape__mypyc" not found!
+126035 WARNING: Hidden import "language__mypyc" not found!
+126035 WARNING: Hidden import "magic__mypyc" not found!
+126035 WARNING: Hidden import "markup__mypyc" not found!
+126035 WARNING: Hidden import "orchestrator__mypyc" not found!
+126037 WARNING: Hidden import "postprocess__mypyc" not found!
+126037 WARNING: Hidden import "statistical__mypyc" not found!
+126037 WARNING: Hidden import "structural__mypyc" not found!
+126037 WARNING: Hidden import "utf1632__mypyc" not found!
+126037 WARNING: Hidden import "utf8__mypyc" not found!
+126037 WARNING: Hidden import "validity__mypyc" not found!
+126639 INFO: Processing standard module hook 'hook-lxml.isoschematron.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive 
+- Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+126936 WARNING: Hidden import "jinja2" not found!
+131471 INFO: Processing standard module hook 'hook-lxml.objectify.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+131496 INFO: Processing standard module hook 'hook-tzdata.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+133010 INFO: Performing binary vs. data reclassification (838 entries)
+146615 INFO: Looking for ctypes DLLs
+146663 INFO: Analyzing run-time hooks ...
+146673 INFO: Including run-time hook 'pyi_rth_inspect.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+146675 INFO: Including run-time hook 'pyi_rth_pywintypes.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\rthooks'
+146676 INFO: Including run-time hook 'pyi_rth_pythoncom.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\rthooks'
+146676 INFO: Including run-time hook 'pyi_rth_setuptools.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+146678 INFO: Including run-time hook 'pyi_rth_pkgutil.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+146680 INFO: Including run-time hook 'pyi_rth_multiprocessing.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+146681 INFO: Including run-time hook 'pyi_rth_pyside6.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+146682 INFO: Processing pre-find-module-path hook 'hook-_pyi_rth_utils.py' from 
+'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_find_module_path'
+146703 INFO: Processing standard module hook 'hook-_pyi_rth_utils.py' from 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+146769 INFO: Creating base_library.zip...
+146798 INFO: Looking for dynamic libraries
+160164 INFO: Extra DLL search directories (AddDllDirectory): ['C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\shiboken6', 
+'C:\\Users\\DaviTorresdeSousa\\OneDrive - Facto\\novo\\Automações\\Nova 
+pasta\\gerador_documentos\\venv\\Lib\\site-packages\\pandas.libs', 'C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\numpy.libs']
+160164 INFO: Extra DLL search directories (PATH): ['C:\\Users\\DaviTorresdeSousa\\OneDrive - 
+Facto\\novo\\Automações\\Nova pasta\\gerador_documentos\\venv\\Lib\\site-packages\\PySide6']
+164787 INFO: Warnings written to C:\Users\DaviTorresdeSousa\OneDrive - Facto\novo\Automações\Nova 
+pasta\gerador_documentos\build\GeradorDocumentos\warn-GeradorDocumentos.txt
+165009 INFO: Graph cross-reference written to C:\Users\DaviTorresdeSousa\OneDrive - Facto\novo\Automações\Nova 
+pasta\gerador_documentos\build\GeradorDocumentos\xref-GeradorDocumentos.html
+165086 INFO: checking PYZ
+165086 INFO: Building PYZ because PYZ-00.toc is non existent
+165086 INFO: Building PYZ (ZlibArchive) C:\Users\DaviTorresdeSousa\OneDrive - Facto\novo\Automações\Nova 
+pasta\gerador_documentos\build\GeradorDocumentos\PYZ-00.pyz
+166909 INFO: Building PYZ (ZlibArchive) C:\Users\DaviTorresdeSousa\OneDrive - Facto\novo\Automações\Nova 
+pasta\gerador_documentos\build\GeradorDocumentos\PYZ-00.pyz completed successfully.
+167069 INFO: checking PKG
+167074 INFO: Building PKG because PKG-00.toc is non existent
+167074 INFO: Building PKG (CArchive) GeradorDocumentos.pkg
+201834 INFO: Building PKG (CArchive) GeradorDocumentos.pkg completed successfully.
+201922 INFO: Bootloader C:\Users\DaviTorresdeSousa\OneDrive - Facto\novo\Automações\Nova 
+pasta\gerador_documentos\venv\Lib\site-packages\PyInstaller\bootloader\Windows-64bit-intel\runw.exe
+201922 INFO: checking EXE
+201922 INFO: Building EXE because EXE-00.toc is non existent
+201922 INFO: Building EXE from EXE-00.toc
+201923 INFO: Copying bootloader EXE to C:\Users\DaviTorresdeSousa\OneDrive - Facto\novo\Automações\Nova 
+pasta\gerador_documentos\dist\GeradorDocumentos.exe
+202364 INFO: Copying icon to EXE
+202497 INFO: Copying 0 resources to EXE
+202497 INFO: Embedding manifest in EXE
+202689 INFO: Appending PKG archive to EXE
+203059 INFO: Fixing EXE headers
+205755 INFO: Building EXE from EXE-00.toc completed successfully.
+205858 INFO: Build complete! The results are available in: C:\Users\DaviTorresdeSousa\OneDrive - 
+Facto\novo\Automações\Nova pasta\gerador_documentos\dist

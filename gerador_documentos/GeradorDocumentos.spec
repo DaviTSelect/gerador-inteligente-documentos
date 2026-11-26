@@ -6,7 +6,7 @@ from PyInstaller.utils.hooks import collect_all
 
 datas = [('version.txt', '.'), ('../logo.ico', '.')]
 binaries = []
-hiddenimports = ['openpyxl', 'openpyxl.cell._writer', 'pandas', 'docx', 'win32com', 'win32com.client', 'win32com.server', 'win32api', 'win32con', 'pywintypes']
+hiddenimports = ['openpyxl', 'openpyxl.cell._writer', 'pandas', 'docx', 'win32com', 'win32com.client', 'win32com.server', 'win32api', 'win32con', 'pywintypes', 'truststore']
 tmp_ret = collect_all('chardet')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('docx2pdf')

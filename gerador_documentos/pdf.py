@@ -4,7 +4,36 @@ pdf.py — Conversão de documentos Word para PDF.
 Usa win32com.client para acionar o Microsoft Word via automação COM.
 Requer que o Microsoft Word esteja instalado no Windows.
 """
+import logging
 import os
+import time
+
+# O Word às vezes recusa uma chamada enquanto está ocupado; uma nova
+# tentativa, com outra instância, costuma resolver.
+TENTATIVAS = 3
+ESPERA_ENTRE_TENTATIVAS = 2  # segundos
+
+_log = logging.getLogger(__name__)
+
+
+def _converter_com_word(cliente, caminho_docx: str, caminho_pdf: str) -> None:
+    """Uma tentativa de conversão. Falha ao fechar o Word não invalida o PDF."""
+    word = cliente.DispatchEx("Word.Application")
+    try:
+        word.Visible = False
+        doc = word.Documents.Open(caminho_docx)
+        try:
+            doc.SaveAs(caminho_pdf, FileFormat=17)  # 17 = wdFormatPDF
+        finally:
+            try:
+                doc.Close(False)
+            except Exception:
+                _log.warning("Falha ao fechar o documento no Word", exc_info=True)
+    finally:
+        try:
+            word.Quit()
+        except Exception:
+            _log.warning("Falha ao encerrar o Word", exc_info=True)
 
 
 def converter_para_pdf(caminho_docx: str) -> str:
@@ -28,14 +57,16 @@ def converter_para_pdf(caminho_docx: str) -> str:
 
     try:
         import win32com.client
-        word = win32com.client.DispatchEx("Word.Application")
-        word.Visible = False
-        try:
-            doc = word.Documents.Open(caminho_abs)
-            doc.SaveAs(caminho_pdf, FileFormat=17)  # 17 = wdFormatPDF
-            doc.Close(False)
-        finally:
-            word.Quit()
+        for tentativa in range(1, TENTATIVAS + 1):
+            try:
+                _converter_com_word(win32com.client, caminho_abs, caminho_pdf)
+                break
+            except Exception:
+                _log.warning("Conversão para PDF falhou (tentativa %d de %d)",
+                             tentativa, TENTATIVAS, exc_info=True)
+                if tentativa == TENTATIVAS:
+                    raise
+                time.sleep(ESPERA_ENTRE_TENTATIVAS)
     except ImportError:
         # Fallback: tenta docx2pdf se win32com não estiver disponível
         try:

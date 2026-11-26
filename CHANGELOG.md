@@ -7,6 +7,16 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.2.1] - 2026-11-26
+
+### Corrigido
+- Verificação de atualização em outros computadores: o certificado do GitHub passa a ser validado pelo próprio Windows, que obtém certificados raiz ausentes e aceita os cadastrados pela rede da empresa.
+- Mensagens de falha do atualizador indicam o motivo (certificado, endereço não encontrado, tempo esgotado, proxy, bloqueio por firewall ou antivírus).
+- Mapeamento automático liga variáveis a colunas com as mesmas palavras em outra ordem (`{{Valor_PSU}}` → `PSU_VALOR`), ignora acentos e prefere o nome idêntico.
+- Conversão para PDF tenta até 3 vezes quando o Word recusa uma chamada, e uma falha ao fechar o Word não descarta mais um PDF já gerado.
+
+---
+
 ## [1.2.0] - 2026-11-26
 
 ### Corrigido

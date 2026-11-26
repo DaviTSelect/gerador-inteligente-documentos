@@ -23,6 +23,8 @@ import os
 import platform
 import re
 import shutil
+import socket
+import ssl
 import struct
 import subprocess
 import sys
@@ -32,6 +34,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
+
+import truststore
 
 # ── Configure aqui ───────────────────────────────────────────────────────────
 # Formato: "usuario/nome-do-repositorio"
@@ -118,7 +122,13 @@ def _abrir(url: str, timeout: int, aceitar: str = "*/*"):
         "Cache-Control": "no-cache",
     })
     try:
-        resposta = urllib.request.urlopen(req, timeout=timeout)
+        # O Windows valida o certificado: ele busca raízes que ainda não estão
+        # instaladas e aceita as que a rede da empresa tiver cadastrado. O
+        # OpenSSL sozinho falhava em computadores recém-configurados.
+        opcoes = {} if partes.scheme != "https" else {
+            "context": truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        }
+        resposta = urllib.request.urlopen(req, timeout=timeout, **opcoes)
         if not local and urllib.parse.urlsplit(resposta.geturl()).scheme != "https":
             resposta.close()
             raise ErroAtualizacao("Redirecionamento recusado: é obrigatório HTTPS.")
@@ -129,12 +139,32 @@ def _abrir(url: str, timeout: int, aceitar: str = "*/*"):
             reset = e.headers.get("X-RateLimit-Reset")
             quando = time.strftime(" após %H:%M", time.localtime(int(reset))) if reset else " mais tarde"
             raise ErroAtualizacao(f"Limite de consultas do GitHub atingido. Tente{quando}.") from e
+        if e.code == 407:
+            raise ErroAtualizacao("O proxy da rede exige login (HTTP 407). Fale com o suporte de TI.") from e
         if e.code == 404:
             raise ErroAtualizacao("Repositório ou arquivo não encontrado no GitHub (HTTP 404).") from e
         raise ErroAtualizacao(f"O GitHub respondeu com erro HTTP {e.code}.") from e
     except (urllib.error.URLError, http.client.HTTPException, OSError) as e:
         log.error("Falha de conexão em %s: %r", url, e)
-        raise ErroAtualizacao("Não foi possível conectar ao GitHub. Verifique a internet.") from e
+        raise ErroAtualizacao(_motivo_da_falha(e, partes.hostname)) from e
+
+
+def _motivo_da_falha(erro: Exception, servidor: str) -> str:
+    """Traduz a falha de conexão em uma mensagem que indica o que verificar."""
+    causa = getattr(erro, "reason", erro)
+    texto = str(causa)
+    if isinstance(causa, ssl.SSLCertVerificationError):
+        return ("O certificado de segurança foi recusado. Confira a data e a hora do "
+                "computador; antivírus ou a rede podem estar interceptando a conexão.")
+    if isinstance(causa, socket.gaierror):
+        return f"O endereço {servidor} não foi encontrado. Verifique a internet."
+    if isinstance(causa, TimeoutError) or "timed out" in texto:
+        return "A conexão demorou demais. Verifique a internet, o firewall ou o proxy."
+    if "Tunnel connection failed" in texto:
+        return "O proxy da rede recusou a conexão. Fale com o suporte de TI."
+    if isinstance(causa, (ConnectionError, PermissionError)):
+        return "Não foi possível conectar. Verifique o firewall e o antivírus deste computador."
+    return "Não foi possível conectar ao GitHub. Verifique a internet."
 
 
 def _baixar_arquivo(url: str, destino: str, callback=None, tamanho_esperado: int = 0):
