@@ -177,3 +177,10 @@ class TestGerarDocumento:
         resultado = gerar_documento(template, dados, saida)
         assert isinstance(resultado, str)
         assert os.path.exists(resultado)
+
+
+def test_nao_sobrescreve_pdf_de_mesmo_nome(tmp_path):
+    template = os.path.join(FIXTURES, "template_runs.docx")
+    (tmp_path / "joao.pdf").write_bytes(b"pdf anterior")
+    saida = gerar_documento(template, {"NOME": "A"}, str(tmp_path / "joao.docx"), reservar_pdf=True)
+    assert os.path.basename(saida) == "joao_2.docx"

@@ -7,6 +7,27 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.2.0] - 2026-11-26
+
+### Corrigido
+- **Formatação perdida no preenchimento**: o gerador juntava o parágrafo inteiro no primeiro run, aplicando a formatação dele a todo o texto (negrito sumia ou aparecia onde não devia). Agora só o texto do marcador é alterado e o valor herda a formatação do marcador. A cor do marcador também passa a ser preservada.
+- Marcadores em hyperlinks, caixas de texto, tabelas aninhadas, cabeçalhos de primeira página/páginas pares e notas de rodapé agora são preenchidos.
+- **Atualizador**: validação de tamanho, SHA-256 e formato antes de instalar; autoverificação do novo executável; troca por rename sem script `.bat` (funciona em pastas com acentos); backup do executável anterior.
+- **"Failed to load Python DLL" após atualizar**: o novo processo herdava o ambiente do PyInstaller do processo antigo.
+- Conversão para PDF não fecha mais um Word que o usuário já tenha aberto.
+- `release.bat` permite publicar a Release de uma tag que foi enviada sem Release.
+- Atualização não reinicia mais o programa no meio do trabalho: oferece "Instalar e reiniciar".
+- Executável cuja versão difere da Release é rejeitado (evita atualização em loop).
+- PDFs de mesmo nome não se sobrescrevem; quebras de linha não quebram o nome do arquivo.
+- `release.bat` recusa publicar com alterações sem commit ou sem SHA-256.
+- A Release é publicada sem a marca "Latest" para não prender a v1.1.1 em loop de reinício; quem usa 1.1.x precisa baixar a 1.2.0 manualmente uma vez.
+
+### Adicionado
+- Mensagens de erro de atualização com botão "Tentar novamente" e log em `%LOCALAPPDATA%\GeradorDocumentos\atualizador.log`.
+- Nomes de variáveis com espaços e acentos (`{{ENDEREÇO}}`, `{{ Nome do Aluno }}`).
+
+---
+
 ## [1.1.9] - 2026-11-23
 
 ### Corrigido

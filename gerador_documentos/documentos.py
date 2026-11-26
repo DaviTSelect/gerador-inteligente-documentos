@@ -5,137 +5,177 @@ Responsabilidade: abrir um .docx template, encontrar variáveis {{VAR}},
 substituí-las pelos valores fornecidos e salvar o resultado sem modificar
 o template original.
 
-Problema importante: o Word frequentemente divide o texto de uma variável
-em múltiplos "runs" (fragmentos XML) por causa da formatação. Por exemplo,
-"{{NOME}}" pode estar armazenado como ["{{", "NOM", "E}}"] em três runs
-separados. A função _colapsar_runs resolve isso antes de substituir.
+Regra de formatação: o valor herda a formatação do marcador no template.
+Nenhum run é criado, fundido, removido ou reformatado — apenas o texto dos
+elementos <w:t> que contêm o marcador é alterado.
+
+O Word costuma dividir "{{NOME}}" em vários runs (ex.: "{{", "NOM", "E}}").
+Nesse caso o valor é escrito no run onde começa o NOME da variável (é a
+formatação dele que vale) e os demais pedaços do marcador são apagados.
 """
+import copy
 import os
 import re
-import shutil
 
 from docx import Document
+from docx.opc.oxml import serialize_part_xml
+from docx.oxml import parse_xml
 from docx.oxml.ns import qn
 
-# Padrão que detecta variáveis no formato {{NOME_DA_VARIAVEL}}
-PADRAO_VARIAVEL = re.compile(r"\{\{([A-Za-z_0-9]+)\}\}")
+# {{NOME}}, {{ Nome do Aluno }}, {{ENDEREÇO}}… O grupo 1 é o nome sem espaços
+# nas pontas. Tabulações e quebras de linha nunca fazem parte de um marcador.
+PADRAO_VARIAVEL = re.compile(
+    r"\{\{[  ]*([^{}\t\n\r  ](?:[^{}\t\n\r]*?[^{}\t\n\r  ])?)[  ]*\}\}"
+)
+
+# Caracteres que o XML não aceita (podem vir de células do Excel)
+_ILEGAIS_XML = re.compile("[\x00-\x08\x0c\x0e-\x1f\ud800-\udfff￾￿]")
+
+# Elementos de um run que separam texto: um marcador não pode atravessá-los
+_SEPARADORES = {qn("w:tab"), qn("w:br"), qn("w:cr")}
+
+# Partes do pacote que têm texto visível, na ordem de coleta das variáveis
+_PARTES_COM_TEXTO = ("document.main", "header", "footer", "footnotes", "endnotes")
+
+_XML_SPACE = "{http://www.w3.org/XML/1998/namespace}space"
 
 
 # ── Funções internas ─────────────────────────────────────────────────────────
 
-def _texto_do_paragrafo(paragrafo) -> str:
-    """Junta todos os runs de um parágrafo em uma string única."""
-    return "".join(run.text for run in paragrafo.runs)
-
-
-def _colapsar_runs(paragrafo) -> None:
+def _partes_com_texto(doc):
     """
-    Consolida todos os runs de um parágrafo em um único run.
+    Gera (parte, elemento_raiz) de cada parte do .docx que contém texto.
 
-    Necessário porque o Word pode dividir "{{NOME}}" em vários runs:
-    ["{{", "NOME", "}}"] — o que impede a substituição direta.
-    Após colapsar, paragrafo.runs[0] contém o texto completo.
-    Preserva a formatação (negrito, fonte) do primeiro run.
+    Percorrer as partes do pacote (em vez de doc.sections) alcança cabeçalhos
+    de primeira página e páginas pares, e não cria cabeçalhos vazios.
     """
-    runs = paragrafo.runs
-    if len(runs) <= 1:
+    partes = list(doc.part.package.iter_parts())
+    for tipo in _PARTES_COM_TEXTO:
+        sufixo = f"wordprocessingml.{tipo}+xml"
+        for parte in sorted(partes, key=lambda p: str(p.partname)):
+            if not parte.content_type.endswith(sufixo):
+                continue
+            raiz = getattr(parte, "element", None)
+            if raiz is None:  # notas de rodapé são carregadas como bytes
+                raiz = parse_xml(parte.blob)
+            yield parte, raiz
+
+
+def _nos_do_paragrafo(paragrafo):
+    """
+    Retorna [(elemento, texto)] do parágrafo na ordem de leitura.
+
+    Inclui texto dentro de hyperlinks, controles de conteúdo e revisões.
+    Ignora parágrafos aninhados (caixas de texto), que são tratados à parte.
+    Separadores entram com elemento None.
+    """
+    nos = []
+
+    def visitar(elemento):
+        for filho in elemento:
+            if filho.tag == qn("w:p"):
+                continue
+            if filho.tag == qn("w:t"):
+                nos.append((filho, filho.text or ""))
+            elif filho.tag in _SEPARADORES and elemento.tag == qn("w:r"):
+                nos.append((None, "\n"))
+            else:
+                visitar(filho)
+
+    visitar(paragrafo)
+    return nos
+
+
+def _definir_texto(t, texto: str) -> None:
+    t.text = texto
+    t.set(_XML_SPACE, "preserve")
+
+
+def _expandir_quebras(t) -> None:
+    """Converte \\n e \\t do valor em <w:br/> e <w:tab/> dentro do mesmo run."""
+    texto = t.text or ""
+    if "\n" not in texto and "\t" not in texto:
         return
 
-    # Junta todo o texto no primeiro run
-    texto_total = "".join(r.text for r in runs)
-    runs[0].text = texto_total
-
-    # Remove os runs extras do XML (mantém apenas o primeiro)
-    # Precisamos remover os elementos XML diretamente
-    primeiro_r = runs[0]._r
-    for run in runs[1:]:
-        r_elem = run._r
-        r_elem.getparent().remove(r_elem)
-
-
-def _substituir_em_paragrafos(paragrafos, dados: dict) -> None:
-    """
-    Substitui variáveis em uma lista de parágrafos.
-
-    Para cada parágrafo que contém ao menos uma variável:
-    1. Colapsa os runs para garantir que a variável está num único fragmento
-    2. Faz a substituição via regex no texto do primeiro run
-    """
-    for para in paragrafos:
-        texto = _texto_do_paragrafo(para)
-        if not PADRAO_VARIAVEL.search(texto):
+    pedacos = re.split(r"([\n\t])", texto)
+    _definir_texto(t, pedacos[0])
+    anterior = t
+    for pedaco in pedacos[1:]:
+        if not pedaco:
             continue
-
-        # Colapsa os runs para facilitar a substituição
-        _colapsar_runs(para)
-
-        if not para.runs:
-            continue
-
-        # Substitui todas as variáveis no texto do primeiro run
-        def substituir(match):
-            nome_var = match.group(1)
-            return dados.get(nome_var, "")
-
-        para.runs[0].text = PADRAO_VARIAVEL.sub(substituir, para.runs[0].text)
-
-        # Remove cor explícita do run para herdar a cor padrão do parágrafo
-        # (evita que a cor de marcação do placeholder apareça no documento final)
-        rPr = para.runs[0]._r.find(qn("w:rPr"))
-        if rPr is not None:
-            color_elem = rPr.find(qn("w:color"))
-            if color_elem is not None:
-                rPr.remove(color_elem)
+        if pedaco == "\n":
+            novo = t.makeelement(qn("w:br"), {})
+        elif pedaco == "\t":
+            novo = t.makeelement(qn("w:tab"), {})
+        else:
+            novo = copy.copy(t)
+            _definir_texto(novo, pedaco)
+        anterior.addnext(novo)
+        anterior = novo
 
 
-def _substituir_em_tabelas(tabelas, dados: dict) -> None:
-    """Substitui variáveis em todas as células de todas as tabelas."""
-    for tabela in tabelas:
-        for linha in tabela.rows:
-            for celula in linha.cells:
-                _substituir_em_paragrafos(celula.paragraphs, dados)
+def _limpar_valor(valor) -> str:
+    texto = str(valor).replace("\r\n", "\n").replace("\r", "\n").replace("\x0b", "\n")
+    return _ILEGAIS_XML.sub("", texto)
 
 
-def _substituir_no_documento(doc, dados: dict) -> None:
-    """
-    Substitui variáveis em todo o documento:
-    - Parágrafos do corpo principal
-    - Células de tabelas
-    - Cabeçalhos e rodapés de cada seção
-    """
-    # Corpo principal
-    _substituir_em_paragrafos(doc.paragraphs, dados)
+def _substituir_no_paragrafo(paragrafo, dados: dict) -> None:
+    """Substitui os marcadores de um parágrafo sem mexer em nenhuma formatação."""
+    nos = _nos_do_paragrafo(paragrafo)
+    completo = "".join(texto for _, texto in nos)
+    marcadores = list(PADRAO_VARIAVEL.finditer(completo))
+    if not marcadores:
+        return
 
-    # Tabelas
-    _substituir_em_tabelas(doc.tables, dados)
+    inicios = []
+    posicao = 0
+    for _, texto in nos:
+        inicios.append(posicao)
+        posicao += len(texto)
 
-    # Cabeçalhos e rodapés de cada seção
-    for secao in doc.sections:
-        # Cabeçalho
-        if secao.header:
-            _substituir_em_paragrafos(secao.header.paragraphs, dados)
-            _substituir_em_tabelas(secao.header.tables, dados)
-        # Rodapé
-        if secao.footer:
-            _substituir_em_paragrafos(secao.footer.paragraphs, dados)
-            _substituir_em_tabelas(secao.footer.tables, dados)
+    textos = [texto for _, texto in nos]
+    alterados = set()
+
+    # De trás para frente: as posições dos marcadores anteriores não mudam
+    for marcador in reversed(marcadores):
+        inicio, fim = marcador.span()
+        inicio_nome = marcador.start(1)
+        valor = _limpar_valor(dados.get(marcador.group(1), ""))
+
+        for i in reversed(range(len(nos))):
+            base = inicios[i]
+            tamanho = len(nos[i][1])
+            if nos[i][0] is None or base >= fim or base + tamanho <= inicio:
+                continue
+            corte_ini = max(inicio - base, 0)
+            corte_fim = min(fim - base, tamanho)
+            # O valor vai para o nó onde o nome da variável começa
+            novo = valor if base <= inicio_nome < base + tamanho else ""
+            textos[i] = textos[i][:corte_ini] + novo + textos[i][corte_fim:]
+            alterados.add(i)
+
+    for i in alterados:
+        t = nos[i][0]
+        _definir_texto(t, textos[i])
+        _expandir_quebras(t)
 
 
-def _caminho_sem_colisao(caminho: str) -> str:
+# ── Utilitário de nome de arquivo ────────────────────────────────────────────
+
+def _caminho_sem_colisao(caminho: str, reservar_pdf: bool = False) -> str:
     """
     Se o arquivo não existe, retorna o caminho original.
     Se existir, adiciona sufixo _2, _3... até encontrar um nome livre.
+    Com reservar_pdf, o .pdf de mesmo nome também precisa estar livre.
     """
-    if not os.path.exists(caminho):
-        return caminho
-
     base, ext = os.path.splitext(caminho)
-    contador = 2
-    while True:
-        novo = f"{base}_{contador}{ext}"
-        if not os.path.exists(novo):
-            return novo
+    candidato, contador = base, 2
+    while os.path.exists(candidato + ext) or (
+        reservar_pdf and os.path.exists(candidato + ".pdf")
+    ):
+        candidato = f"{base}_{contador}"
         contador += 1
+    return candidato + ext
 
 
 # ── API pública ──────────────────────────────────────────────────────────────
@@ -144,49 +184,23 @@ def extrair_variaveis(caminho_docx: str) -> list[str]:
     """
     Abre um arquivo .docx e retorna a lista de variáveis encontradas.
 
-    Busca o padrão {{NOME}} em:
-    - Parágrafos do corpo
-    - Células de tabelas
-    - Cabeçalhos e rodapés
-
-    Retorna lista sem duplicatas, na ordem de aparição.
+    Busca o padrão {{NOME}} no corpo, tabelas, caixas de texto, cabeçalhos,
+    rodapés e notas. Retorna lista sem duplicatas, na ordem de aparição.
     """
     doc = Document(caminho_docx)
-    encontradas = []
-    vistas = set()
+    encontradas = {}
 
-    def _coletar_de_paragrafos(paragrafos):
-        for para in paragrafos:
-            texto = _texto_do_paragrafo(para)
-            for match in PADRAO_VARIAVEL.finditer(texto):
-                nome = match.group(1)
-                if nome not in vistas:
-                    vistas.add(nome)
-                    encontradas.append(nome)
+    for _, raiz in _partes_com_texto(doc):
+        for paragrafo in raiz.iter(qn("w:p")):
+            completo = "".join(texto for _, texto in _nos_do_paragrafo(paragrafo))
+            for marcador in PADRAO_VARIAVEL.finditer(completo):
+                encontradas.setdefault(marcador.group(1), None)
 
-    def _coletar_de_tabelas(tabelas):
-        for tabela in tabelas:
-            for linha in tabela.rows:
-                for celula in linha.cells:
-                    _coletar_de_paragrafos(celula.paragraphs)
-
-    # Corpo
-    _coletar_de_paragrafos(doc.paragraphs)
-    _coletar_de_tabelas(doc.tables)
-
-    # Cabeçalhos e rodapés
-    for secao in doc.sections:
-        if secao.header:
-            _coletar_de_paragrafos(secao.header.paragraphs)
-            _coletar_de_tabelas(secao.header.tables)
-        if secao.footer:
-            _coletar_de_paragrafos(secao.footer.paragraphs)
-            _coletar_de_tabelas(secao.footer.tables)
-
-    return encontradas
+    return list(encontradas)
 
 
-def gerar_documento(caminho_template: str, dados: dict, caminho_saida: str) -> str:
+def gerar_documento(caminho_template: str, dados: dict, caminho_saida: str,
+                    reservar_pdf: bool = False) -> str:
     """
     Gera um documento Word preenchido a partir de um template.
 
@@ -198,16 +212,18 @@ def gerar_documento(caminho_template: str, dados: dict, caminho_saida: str) -> s
         caminho_template: caminho para o arquivo .docx template
         dados: dict {NOME_VARIAVEL: valor_string}
         caminho_saida: caminho desejado para o arquivo gerado
+        reservar_pdf: True quando o .docx será convertido (evita sobrescrever PDF)
     """
     # Resolve colisão de nome antes de qualquer operação
-    caminho_real = _caminho_sem_colisao(caminho_saida)
+    caminho_real = _caminho_sem_colisao(caminho_saida, reservar_pdf)
 
-    # Copia o template (nunca abre o original para escrever)
-    shutil.copy2(caminho_template, caminho_real)
+    doc = Document(caminho_template)
+    for parte, raiz in _partes_com_texto(doc):
+        for paragrafo in list(raiz.iter(qn("w:p"))):
+            _substituir_no_paragrafo(paragrafo, dados)
+        if getattr(parte, "element", None) is None:
+            parte._blob = serialize_part_xml(raiz)
 
-    # Abre a cópia, substitui e salva
-    doc = Document(caminho_real)
-    _substituir_no_documento(doc, dados)
     doc.save(caminho_real)
 
     return caminho_real

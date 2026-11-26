@@ -28,7 +28,7 @@ def converter_para_pdf(caminho_docx: str) -> str:
 
     try:
         import win32com.client
-        word = win32com.client.Dispatch("Word.Application")
+        word = win32com.client.DispatchEx("Word.Application")
         word.Visible = False
         try:
             doc = word.Documents.Open(caminho_abs)

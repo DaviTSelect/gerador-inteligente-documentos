@@ -4,8 +4,10 @@ app.py — Interface gráfica do Gerador Inteligente de Documentos.
 Contém a janela principal e todas as 5 etapas do fluxo de trabalho.
 Usa PySide6 para a interface.
 """
+import html
 import os
 import subprocess
+import threading
 import time
 
 from PySide6.QtCore import QThread, Signal, Qt
@@ -20,6 +22,7 @@ from PySide6.QtWidgets import (
 import documentos
 import planilhas
 import pdf as pdf_modulo
+import updater
 
 # ── Paleta de cores ──────────────────────────────────────────────────────────
 COR_SIDEBAR     = "#0F172A"
@@ -195,6 +198,9 @@ class EtapaIndicador(QWidget):
 class Sidebar(QWidget):
     """Barra lateral esquerda com indicadores das 5 etapas."""
 
+    tentar_atualizacao = Signal()
+    instalar_atualizacao = Signal()
+
     ETAPAS = [
         ("Documento template",    "Selecione o arquivo .docx"),
         ("Modo de preenchimento", "Planilha ou manual"),
@@ -305,6 +311,11 @@ class Sidebar(QWidget):
         self._texto_update.setStyleSheet(
             f"color: {COR_SIDEBAR_TEXT}; background: transparent;"
         )
+        self._texto_update.setWordWrap(True)
+        self._texto_update.linkActivated.connect(
+            lambda alvo: (self.instalar_atualizacao if alvo == "instalar"
+                          else self.tentar_atualizacao).emit()
+        )
         update_row.addWidget(self._dot_update)
         update_row.addWidget(self._texto_update, 1)
         rod_layout.addLayout(update_row)
@@ -324,6 +335,22 @@ class Sidebar(QWidget):
             f"color: {cor}; font-size: 11px; background: transparent;"
         )
         self._texto_update.setText(texto)
+
+    def oferecer_instalacao(self, versao: str):
+        self.atualizar_status_atualizacao("#F59E0B", "")
+        self._texto_update.setText(
+            f"v{html.escape(versao)} pronta para instalar<br>"
+            f'<a href="instalar" style="color:{COR_ACENTO};">Instalar e reiniciar</a>'
+        )
+
+    def mostrar_erro_atualizacao(self, texto: str, caminho_log: str):
+        """Mensagem de erro com link para tentar novamente."""
+        self.atualizar_status_atualizacao("#EF4444", "")
+        self._texto_update.setText(
+            f'{html.escape(texto)}<br><a href="retry" style="color:{COR_ACENTO};">'
+            "Tentar novamente</a>"
+        )
+        self._texto_update.setToolTip(f"Detalhes técnicos em: {caminho_log}")
 
 
 # ── Etapa 1: Template ────────────────────────────────────────────────────────
@@ -1527,7 +1554,7 @@ class ThreadGeracao(QThread):
                 nome_arquivo = padrao
                 for var, val in dados.items():
                     import re
-                    val_safe = re.sub(r'[<>:"/\\|?*]', '_', str(val))
+                    val_safe = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '_', str(val))
                     nome_arquivo = nome_arquivo.replace(f"{{{{{var}}}}}", val_safe)
                 # Remove qualquer extensão (.pdf, .docx) que esteja no padrão
                 import re as _re
@@ -1537,7 +1564,9 @@ class ThreadGeracao(QThread):
 
                 # Gera sempre como .docx (python-docx só salva DOCX)
                 caminho_docx = os.path.join(pasta, base_nome + ".docx")
-                caminho_gerado = documentos.gerar_documento(template, dados, caminho_docx)
+                caminho_gerado = documentos.gerar_documento(
+                    template, dados, caminho_docx, reservar_pdf=converter_pdf
+                )
 
                 arquivo_final = caminho_gerado
                 if converter_pdf:
@@ -1772,17 +1801,14 @@ class MainWindow(QMainWindow):
     """
 
     _sinal_status_update = Signal(str, str)
-    _sinal_restart = Signal()
+    _sinal_update_pronto = Signal(object, str)
+    _sinal_erro_update = Signal(str)
 
     def __init__(self):
         super().__init__()
-        import os as _os
-        _vf = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "version.txt")
-        try:
-            _v = open(_vf).read().strip()
-        except Exception:
-            _v = "1.0.0"
-        self.setWindowTitle(f"Gerador Inteligente de Documentos  v{_v}")
+        self.setWindowTitle(
+            f"Gerador Inteligente de Documentos  v{updater.ler_versao_local()}"
+        )
         self.setFixedSize(1200, 800)
         self._aplicar_icone()
 
@@ -1793,8 +1819,14 @@ class MainWindow(QMainWindow):
         self._setup_ui()
         self.ir_para_etapa(1)
         self._sinal_status_update.connect(self.sidebar.atualizar_status_atualizacao)
-        self._sinal_restart.connect(self._ao_reiniciar)
-        self._exe_update = False  # True quando atualização via .exe (bat cuida do restart)
+        self._sinal_update_pronto.connect(self._ao_update_pronto)
+        self._sinal_erro_update.connect(
+            lambda texto: self.sidebar.mostrar_erro_atualizacao(texto, updater.caminho_log())
+        )
+        self.sidebar.tentar_atualizacao.connect(self.verificar_atualizacoes)
+        self.sidebar.instalar_atualizacao.connect(self._instalar_e_reiniciar)
+        self._update_pronto = None
+        self._thread_update = None
 
     def _aplicar_icone(self):
         import os, sys
@@ -1897,62 +1929,88 @@ class MainWindow(QMainWindow):
 
     def verificar_atualizacoes(self):
         """Inicia verificação de atualização em background — não trava a UI."""
-        import threading
-        threading.Thread(target=self._verificar_atualizacoes_bg, daemon=True).start()
+        if self._update_pronto or (self._thread_update and self._thread_update.is_alive()):
+            return
+        self.sidebar.atualizar_status_atualizacao("#F59E0B", "Verificando atualizações...")
+        self._thread_update = threading.Thread(
+            target=self._verificar_atualizacoes_bg, daemon=True
+        )
+        self._thread_update.start()
 
     def _verificar_atualizacoes_bg(self):
         """Roda em thread separada; comunica com a UI apenas por sinais."""
-        try:
-            import updater
-            info = updater.verificar_atualizacao()
-        except Exception:
-            self._sinal_status_update.emit("#64748B", "sem conexão")
+        info = updater.verificar_atualizacao()
+        versao_local = info["versao_local"]
+
+        if info["erro"]:
+            self._sinal_erro_update.emit(f"v{versao_local} · {info['erro']}")
             return
 
-        versao_local = info.get("versao_local", "?")
-
-        if not info.get("versao_nova"):
-            self._sinal_status_update.emit("#64748B", f"v{versao_local} · sem conexão")
-            return
-
-        if not info.get("disponivel"):
+        if not info["disponivel"]:
             self._sinal_status_update.emit("#22C55E", f"v{versao_local} · atualizado")
             return
 
         versao_nova = info["versao_nova"]
-        url = info["url_download"]
         self._sinal_status_update.emit("#F59E0B", f"v{versao_nova} disponível · baixando...")
 
-        try:
-            def _cb(baixados, total):
-                if total > 0:
-                    pct = int(baixados / total * 100)
-                    self._sinal_status_update.emit(
-                        "#F59E0B", f"Baixando v{versao_nova}… {pct}%"
-                    )
+        ultimo_pct = [-1]
 
-            import updater as _upd
-            precisa_reiniciar = _upd.aplicar_atualizacao(url, versao_nova, callback_progresso=_cb)
+        def _cb(baixados, total):
+            pct = int(baixados / total * 100) if total > 0 else 0
+            if pct != ultimo_pct[0]:
+                ultimo_pct[0] = pct
+                texto = (f"Baixando v{versao_nova}… {pct}%" if pct < 100
+                         else f"Verificando v{versao_nova}…")
+                self._sinal_status_update.emit("#F59E0B", texto)
+
+        try:
+            preparado = updater.preparar_atualizacao(info, callback_progresso=_cb)
+        except updater.ErroAtualizacao as e:
+            self._sinal_erro_update.emit(f"v{versao_local} · {e}")
+            return
         except Exception:
-            self._sinal_status_update.emit("#64748B", f"v{versao_local} · erro ao baixar")
+            updater.log.exception("Erro inesperado ao atualizar")
+            self._sinal_erro_update.emit(f"v{versao_local} · erro ao atualizar (veja o log)")
             return
 
-        # _exe_update deve ser definido antes de emitir o sinal (lido na main thread)
-        self._exe_update = not precisa_reiniciar
-        self._sinal_status_update.emit("#22C55E", f"v{versao_nova} · reiniciando...")
-        # Sempre usa o sinal Qt para garantir execução na main thread (thread-safe)
-        self._sinal_restart.emit()
+        # A troca do executável acontece na thread principal
+        self._sinal_update_pronto.emit(info, preparado)
 
-    def _ao_reiniciar(self):
-        from PySide6.QtCore import QTimer
-        from PySide6.QtWidgets import QApplication
-        if self._exe_update:
-            # Atualização via .exe: bat já vai iniciar o novo exe; só fechar
-            QTimer.singleShot(1500, QApplication.instance().quit)
+    def _usuario_trabalhando(self) -> bool:
+        return self.etapa_atual != 1 or bool(self.dados_sessao.get("template_caminho"))
+
+    def _gerando(self) -> bool:
+        return any(t.isRunning() for t in self.findChildren(ThreadGeracao))
+
+    def _ao_update_pronto(self, info: dict, preparado: str):
+        self._update_pronto = (info, preparado)
+        if self._usuario_trabalhando():
+            self.sidebar.oferecer_instalacao(info["versao_nova"])
         else:
-            # Atualização via .zip: precisa reiniciar o próprio processo
-            QTimer.singleShot(1500, self._executar_restart)
+            self._instalar_e_reiniciar()
 
-    def _executar_restart(self):
-        import updater
-        updater.reiniciar()
+    def _instalar_e_reiniciar(self):
+        if not self._update_pronto:
+            return
+        if self._gerando():
+            QMessageBox.information(
+                self, "Atualização", "Aguarde o fim da geração dos documentos."
+            )
+            return
+        info, preparado = self._update_pronto
+        self._update_pronto = None
+        try:
+            updater.instalar_atualizacao(info, preparado)
+        except updater.ErroAtualizacao as e:
+            self._sinal_erro_update.emit(f"v{info['versao_local']} · {e}")
+            return
+        # Reinício imediato: o programa antigo não deve seguir rodando após a troca
+        try:
+            updater.reiniciar()
+        except OSError as e:
+            updater.log.exception("Falha ao reiniciar")
+            self.sidebar.atualizar_status_atualizacao(
+                "#F59E0B", f"Atualizado. Feche e abra o programa. ({e})"
+            )
+            return
+        QApplication.instance().quit()
